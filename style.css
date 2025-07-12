@@ -1,15 +1,15 @@
-/* Dark Theme CSS */
+/* DARK THEME CSS - By ChatGPT for Naman */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   background-color: #121212;
-  color: #f0f0f0;
+  color: #f5f5f5;
 }
 
 header {
   background-color: #1f1f1f;
-  color: #fff;
+  color: #ffffff;
   padding: 20px;
   text-align: center;
   border-bottom: 2px solid #333;
@@ -29,15 +29,22 @@ nav a:hover {
 section {
   padding: 20px;
   background-color: #1a1a1a;
-  margin: 10px;
-  border-radius: 8px;
-  box-shadow: 0 0 5px #000;
+  margin: 20px auto;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.6);
 }
 
 footer {
   background-color: #1f1f1f;
-  color: white;
+  color: #bbb;
   text-align: center;
-  padding: 10px;
+  padding: 15px;
   border-top: 2px solid #333;
+  font-size: 0.9em;
+}
+
+a {
+  color: #82b1ff;
 }
