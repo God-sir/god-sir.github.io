@@ -1,11 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Monster Truck Runner - Play Online</title>
-  <meta name="description" content="Play Monster Truck Runner - a thrilling endless runner game made by Naman. Jump obstacles, collect points, and challenge your reflexes!">
-  <meta name="keywords" content="Monster Truck Game, Endless Runner, Online Game, Truck Jump Game, Play Naman Game">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monster Truck Runner</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { overflow: hidden; font-family: sans-serif; }
@@ -70,27 +69,14 @@ let highScore = parseInt(localStorage.getItem('highScore')) || 0;
 let level = 1;
 
 const themes = [
-  { ground: '#27ae60' },
-  { ground: '#34495e' },
-  { ground: '#f39c12' },
+  { bg: '#b3f0a1', ground: '#27ae60' },
+  { bg: '#2c3e50', ground: '#34495e' },
+  { bg: '#f7d794', ground: '#f39c12' },
 ];
 let currentTheme = 0;
 
-// Load Monster Truck
 const monsterTruckImg = new Image();
-monsterTruckImg.src = 'https://i.postimg.cc/Y0zHxsk0/monster-truck-pixel.png';
-
-// Load Parallax Background Layers
-const bgLayers = [
-  { img: new Image(), speed: 1 },
-  { img: new Image(), speed: 2 },
-  { img: new Image(), speed: 3 }
-];
-bgLayers[0].img.src = 'https://sora.chatgpt.com/g/gen_01k0181rzgfncbdynbjqr3t5sy';       // Sky
-bgLayers[1].img.src = 'https://i.postimg.cc/LXzFGjVH/bg-mountain.png'; // Mountains
-bgLayers[2].img.src = 'https://i.postimg.cc/1X3CZK7h/bg-bush.png';     // Foreground
-
-let bgX = 0;
+monsterTruckImg.src = 'https://i.ibb.co/MR5kkDn/truck-pixel.png';
 
 const car = {
   x: 100,
@@ -104,18 +90,14 @@ const car = {
 let obstacles = [];
 let frames = 0;
 
-function drawParallaxBackground() {
-  for (let layer of bgLayers) {
-    let img = layer.img;
-    let x = -(bgX * layer.speed) % canvas.width;
-    ctx.drawImage(img, x, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, x + canvas.width, 0, canvas.width, canvas.height);
-  }
-}
-
 function drawGround() {
   ctx.fillStyle = themes[currentTheme].ground;
   ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+}
+
+function drawBackground() {
+  ctx.fillStyle = themes[currentTheme].bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawCar() {
@@ -160,8 +142,7 @@ function isColliding(a, b) {
 }
 
 function update() {
-  bgX += 1;
-  drawParallaxBackground();
+  drawBackground();
   drawGround();
   drawCar();
   drawObstacles();
