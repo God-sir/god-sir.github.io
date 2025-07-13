@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,18 +78,6 @@ let currentTheme = 0;
 const monsterTruckImg = new Image();
 monsterTruckImg.src = 'https://i.ibb.co/MR5kkDn/truck-pixel.png';
 
-// Background layers
-const bgLayers = [
-  { img: new Image(), speed: 0.3 },  // Clouds
-  { img: new Image(), speed: 0.6 },  // Mountains
-  { img: new Image(), speed: 1.2 }   // Trees
-];
-bgLayers[0].img.src = '20250713_1208_Cloudy Blue Sky_simple_compose_01k0181rzfeh2r24pjswc5z57a.png';
-bgLayers[1].img.src = 'https://i.ibb.co/0q0j4VH/mountains.png';
-bgLayers[2].img.src = 'https://i.ibb.co/9bgL6dq/trees.png';
-
-const bgPositions = [0, 0, 0];
-
 const car = {
   x: 100,
   y: canvas.height - groundHeight - 60,
@@ -101,23 +90,14 @@ const car = {
 let obstacles = [];
 let frames = 0;
 
-function drawParallaxBackground() {
-  ctx.fillStyle = themes[currentTheme].bg;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for (let i = 0; i < bgLayers.length; i++) {
-    const layer = bgLayers[i];
-    bgPositions[i] -= layer.speed;
-    if (bgPositions[i] <= -canvas.width) bgPositions[i] = 0;
-
-    ctx.drawImage(layer.img, bgPositions[i], 0, canvas.width, canvas.height);
-    ctx.drawImage(layer.img, bgPositions[i] + canvas.width, 0, canvas.width, canvas.height);
-  }
-}
-
 function drawGround() {
   ctx.fillStyle = themes[currentTheme].ground;
   ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+}
+
+function drawBackground() {
+  ctx.fillStyle = themes[currentTheme].bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 function drawCar() {
@@ -162,7 +142,7 @@ function isColliding(a, b) {
 }
 
 function update() {
-  drawParallaxBackground();
+  drawBackground();
   drawGround();
   drawCar();
   drawObstacles();
@@ -201,19 +181,7 @@ function update() {
   requestAnimationFrame(update);
 }
 
-let imagesLoaded = 0;
-const totalImages = bgLayers.length + 1;
-
-function checkStart() {
-  imagesLoaded++;
-  if (imagesLoaded === totalImages) update();
-}
-
-monsterTruckImg.onload = checkStart;
-bgLayers.forEach(layer => {
-  layer.img.onload = checkStart;
-});
-
+monsterTruckImg.onload = update;
 themeButton.addEventListener('click', () => currentTheme = (currentTheme + 1) % themes.length);
 </script>
 </body>
