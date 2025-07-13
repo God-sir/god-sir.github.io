@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monster Truck Runner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; font-family: sans-serif; }
+    canvas { display: block; }
+    #scoreBoard {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px 16px;
+      border-radius: 10px;
+      z-index: 10;
+    }
+    #themeButton {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 16px;
+      padding: 8px 12px;
+      border: none;
+      background: #333;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+<div id="scoreBoard">Score: 0 | High Score: 0 | Level: 1</div>
+<button id="themeButton">Switch Theme</button>
+<canvas id="gameCanvas"></canvas>
+<audio id="jumpSound" preload="auto">
+  <source src="https://www.soundjay.com/mechanical/sounds/spring-bounce-01.mp3" type="audio/mpeg">
+</audio>
+<audio id="hitSound" preload="auto">
+  <source src="https://www.soundjay.com/button/sounds/beep-05.mp3" type="audio/mpeg">
+</audio>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreBoard = document.getElementById('scoreBoard');
+const jumpSound = document.getElementById('jumpSound');
+const hitSound = document.getElementById('hitSound');
+const themeButton = document.getElementById('themeButton');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let soundEnabled = false;
+window.addEventListener('click', () => { soundEnabled = true; });
+window.addEventListener('keydown', () => { soundEnabled = true; });
+
+let groundHeight = 80;
+const gravity = 0.7;
+let gameSpeed = 6;
+let boxColors = ['#e74c3c', '#9b59b6', '#3498db', '#f1c40f', '#1abc9c'];
+let score = 0;
+let highScore = parseInt(localStorage.getItem('highScore')) || 0;
+let level = 1;
+
+const themes = [
+  { bg: '#b3f0a1', ground: '#27ae60' },
+  { bg: '#2c3e50', ground: '#34495e' },
+  { bg: '#f7d794', ground: '#f39c12' },
+];
+let currentTheme = 0;
+
+const monsterTruckImg = new Image();
+monsterTruckImg.src = 'https://i.ibb.co/MR5kkDn/truck-pixel.png';
+
+const car = {
+  x: 100,
+  y: canvas.height - groundHeight - 60,
+  width: 90,
+  height: 60,
+  velocityY: 0,
+  isJumping: false
+};
+
+let obstacles = [];
+let frames = 0;
+
+function drawGround() {
+  ctx.fillStyle = themes[currentTheme].ground;
+  ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+}
+
+function drawBackground() {
+  ctx.fillStyle = themes[currentTheme].bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawCar() {
+  ctx.drawImage(monsterTruckImg, car.x, car.y, car.width, car.height);
+}
+
+function createObstacle() {
+  const type = Math.floor(Math.random() * 4);
+  let height, width;
+  if (type === 0) { width = 30; height = 40; }
+  else if (type === 1) { width = 30; height = 70; }
+  else if (type === 2) { width = 60; height = 40; }
+  else { width = 60; height = 70; }
+  const color = boxColors[Math.floor(Math.random() * boxColors.length)];
+  obstacles.push({ x: canvas.width, y: canvas.height - groundHeight - height, width, height, color });
+}
+
+function drawObstacles() {
+  for (let obs of obstacles) {
+    obs.x -= gameSpeed;
+    ctx.fillStyle = obs.color;
+    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+  }
+  obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+}
+
+function jump() {
+  if (!car.isJumping) {
+    car.velocityY = -14;
+    car.isJumping = true;
+    if (soundEnabled) jumpSound.play().catch(() => {});
+  }
+}
+
+document.addEventListener('keydown', e => e.code === 'Space' && jump());
+document.addEventListener('mousedown', jump);
+
+function isColliding(a, b) {
+  return (
+    a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y
+  );
+}
+
+function update() {
+  drawBackground();
+  drawGround();
+  drawCar();
+  drawObstacles();
+
+  car.y += car.velocityY;
+  car.velocityY += gravity;
+
+  if (car.y + car.height >= canvas.height - groundHeight) {
+    car.y = canvas.height - groundHeight - car.height;
+    car.isJumping = false;
+  }
+
+  for (let obs of obstacles) {
+    if (isColliding(car, obs)) {
+      if (soundEnabled) hitSound.play().catch(() => {});
+      alert('Game Over! Your Score: ' + score);
+      if (score > highScore) {
+        localStorage.setItem('highScore', score);
+      }
+      location.reload();
+      return;
+    }
+  }
+
+  frames++;
+  if (frames % 80 === 0) createObstacle();
+
+  if (frames % 10 === 0) {
+    score++;
+    level = Math.floor(score / 500) + 1;
+    scoreBoard.innerText = `Score: ${score} | High Score: ${highScore} | Level: ${level}`;
+    if (score % 100 === 0) gameSpeed++;
+    if (score % 500 === 0) currentTheme = (currentTheme + 1) % themes.length;
+  }
+
+  requestAnimationFrame(update);
+}
+
+monsterTruckImg.onload = update;
+themeButton.addEventListener('click', () => currentTheme = (currentTheme + 1) % themes.length);
+</script>
+</body>
+</html>
